@@ -69,7 +69,7 @@ int bk_open_image(VolInfo* volInfo, const char* filename)
 {
     size_t len;
     
-    volInfo->imageForReading = open(filename, O_RDONLY, 0);
+    volInfo->imageForReading = open(filename, O_BINARY | O_RDONLY, 0);
     if(volInfo->imageForReading == -1)
     {
         volInfo->imageForReading = 0;

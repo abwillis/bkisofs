@@ -174,7 +174,7 @@ int findInHardLinkTable(VolInfo* volInfo, bk_off_t position,
                 }
                 else
                 {
-                    origFile = open(currentLink->pathAndName, O_RDONLY, 0);
+                    origFile = open(currentLink->pathAndName, O_BINARY | O_RDONLY, 0);
                     if(origFile == -1)
                         return BKERROR_OPEN_READ_FAILED;
                     origFileWasOpened = true;
@@ -190,7 +190,7 @@ int findInHardLinkTable(VolInfo* volInfo, bk_off_t position,
                 }
                 else
                 {
-                    newFile = open(pathAndName, O_RDONLY, 0);
+                    newFile = open(pathAndName, O_BINARY | O_RDONLY, 0);
                     if(newFile == -1)
                     {
                         if(origFileWasOpened)
@@ -243,7 +243,7 @@ int readFileHead(VolInfo* volInfo, bk_off_t position, char* pathAndName,
     }
     else
     {
-        srcFile = open(pathAndName, O_RDONLY, 0);
+        srcFile = open(pathAndName, O_BINARY | O_RDONLY, 0);
         if(srcFile == -1)
             return BKERROR_OPEN_READ_FAILED;
         srcFileWasOpened = true;

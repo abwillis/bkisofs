@@ -90,7 +90,7 @@ int bk_write_image(const char* newImagePathAndName, VolInfo* volInfo,
     
     printf("opening '%s' for writing\n", newImagePathAndName);fflush(NULL);
     volInfo->imageForWriting = open(newImagePathAndName, 
-                                    O_RDWR | O_CREAT | O_TRUNC, 
+                                    O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 
                                     S_IRUSR | S_IWUSR);
     if(volInfo->imageForWriting == -1)
     {
@@ -187,7 +187,7 @@ int bk_write_image(const char* newImagePathAndName, VolInfo* volInfo,
         }
         else
         {
-            srcFile = open(volInfo->bootRecordPathAndName, O_RDONLY, 0);
+            srcFile = open(volInfo->bootRecordPathAndName, O_BINARY | O_RDONLY, 0);
             if(srcFile == -1)
             {
                 freeDirToWriteContents(&newTree);
@@ -434,7 +434,7 @@ int bootInfoTableChecksum(int oldImage, FileToWrite* file, unsigned* checksum)
     else
     /* read file from fs */
     {
-        srcFile = open(file->pathAndName, O_RDONLY, 0);
+        srcFile = open(file->pathAndName, O_BINARY | O_RDONLY, 0);
         if(srcFile == -1)
         {
             free(contents);
@@ -1322,7 +1322,7 @@ int writeFileContents(VolInfo* volInfo, DirToWrite* dir, int filenameTypes)
                     FILETW_PTR(child)->size = statStruct.st_size;
                     /* UPDATE the file's size, in case it's changed since we added it */
                     
-                    srcFile = open(FILETW_PTR(child)->pathAndName, O_RDONLY, 0);
+                    srcFile = open(FILETW_PTR(child)->pathAndName, O_BINARY | O_RDONLY, 0);
                     if(srcFile == -1)
                         return BKERROR_OPEN_READ_FAILED;
                     
@@ -2075,10 +2075,8 @@ int writeRockSL(VolInfo* volInfo, SymLinkToWrite* symlink, bool doWrite)
     }
     
     free(record);
-
     return (int)(5 + numBytesNeeded);
 }
-
 /* This doesn't need support for CE because it's only written in one place,
 * the root 'self' directory record. */
 int writeRockSP(VolInfo* volInfo)
@@ -2109,7 +2107,6 @@ int writeRockSP(VolInfo* volInfo)
     
     return 1;
 }
-
 int writeVdsetTerminator(VolInfo* volInfo)
 {
     int rc;
@@ -2140,7 +2137,6 @@ int writeVdsetTerminator(VolInfo* volInfo)
     
     return 1;
 }
-
 /*
 * -has to be called after the files were written so that the 
 *  volume size is recorded properly
@@ -2167,7 +2163,6 @@ int writeVolDescriptor(VolInfo* volInfo, bk_off_t rootDrLocation,
     else
         byte = 2;
     /* END VOLUME descriptor type */
-
     rc = write711(volInfo, byte);
     if(rc <= 0)
         return rc;
@@ -2507,7 +2502,6 @@ int writeVolDescriptor(VolInfo* volInfo, bk_off_t rootDrLocation,
     
     return 1;
 }
-
 /******************************************************************************
 * wroteIsolinuxBootRecord()
 * Check whether the file already written to the new iso was a boot record.

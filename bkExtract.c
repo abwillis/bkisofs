@@ -62,7 +62,7 @@ int bk_extract_boot_record(VolInfo* volInfo, const char* destPathAndName,
         }
         else
         {
-            srcFile = open(volInfo->bootRecordOnImage->pathAndName, O_RDONLY, 0);
+            srcFile = open(volInfo->bootRecordOnImage->pathAndName, O_BINARY | O_RDONLY, 0);
             if(srcFile == -1)
                 return BKERROR_OPEN_READ_FAILED;
             srcFileWasOpened = true;
@@ -79,7 +79,7 @@ int bk_extract_boot_record(VolInfo* volInfo, const char* destPathAndName,
         }
         else
         {
-            srcFile = open(volInfo->bootRecordPathAndName, O_RDONLY, 0);
+            srcFile = open(volInfo->bootRecordPathAndName, O_BINARY | O_RDONLY, 0);
             if(srcFile == -1)
                 return BKERROR_OPEN_READ_FAILED;
             srcFileWasOpened = true;
@@ -87,7 +87,7 @@ int bk_extract_boot_record(VolInfo* volInfo, const char* destPathAndName,
     }
     /* END SET source file (open if needed) */
     
-    destFile = open(destPathAndName, O_WRONLY | O_CREAT | O_TRUNC, 
+    destFile = open(destPathAndName, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, 
                     destFilePerms);
     if(destFile == -1)
     {
@@ -372,7 +372,7 @@ int extractFile(VolInfo* volInfo, BkFile* srcFileInTree, const char* destDir,
     }
     else
     {
-        srcFile = open(srcFileInTree->pathAndName, O_RDONLY, 0);
+        srcFile = open(srcFileInTree->pathAndName, O_BINARY | O_RDONLY, 0);
         if(srcFile == -1)
             return BKERROR_OPEN_READ_FAILED;
         srcFileWasOpened = true;
@@ -424,7 +424,7 @@ int extractFile(VolInfo* volInfo, BkFile* srcFileInTree, const char* destDir,
     else
         destFilePerms = volInfo->posixFileDefaults;
     
-    destFile = open(destPathAndName, O_WRONLY | O_CREAT | O_TRUNC, destFilePerms);
+    destFile = open(destPathAndName, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, destFilePerms);
     if(destFile == -1)
     {
         if(srcFileWasOpened)

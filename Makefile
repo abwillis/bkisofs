@@ -1,4 +1,7 @@
 # CC, AR, RM defined in parent makefile
+CC=gcc
+AR=ar
+rm=rm -f
 
 OBJECTS = bkRead7x.o bkAdd.o bkDelete.o bkExtract.o bkRead.o bkPath.o bkMangle.o bkWrite.o bkWrite7x.o bkTime.o bkSort.o bkError.o bkGet.o bkSet.o bkCache.o bkLink.o bkMisc.o bkIoWrappers.o
 
@@ -22,8 +25,11 @@ $(OBJECTS): %.o: %.c %.h Makefile bk.h bkInternal.h
 	@$(CC) $< $(CFLAGS) $(CPPFLAGS) -c -o $@
 
 example: example.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) example.c bk.a -o example
+	$(CC) $(CFLAGS) $(CPPFLAGS) example.c bk.a -o example.exe
+
+bk.dll: bk.a
+	@$(CC) -Zdll bk.a
 
 clean: 
-	$(RM) *.o bk.a
+	$(RM) *.o bk.a example.exe bk.dll
 

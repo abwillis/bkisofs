@@ -53,10 +53,12 @@ int main( int argv, char** argc)
     if(rc <= 0)
         fatalError(bk_get_error_string(rc));
     
+#ifndef __OS2__   
     /* add the file /etc/fstab to the root of the image */
     rc = bk_add(&volInfo, "/etc/fstab", "/", addProgressUpdaterCbk);
     if(rc <= 0)
         fatalError(bk_get_error_string(rc));
+#endif
     
     /* print the entire directory tree */
     printNameAndContents(BK_BASE_PTR( &(volInfo.dirTree) ), 0);
