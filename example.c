@@ -59,6 +59,13 @@ int main( int argv, char** argc)
     if(rc <= 0)
         fatalError(bk_get_error_string(rc));
 #endif
+#ifdef __OS2__   
+    /* add the file example.exe to the root of the image */
+    /* this requires example.exe to be run from the directory it exists in, not from path */
+    rc = bk_add(&volInfo, "example.exe", "/", addProgressUpdaterCbk);
+    if(rc <= 0)
+        fatalError(bk_get_error_string(rc));
+#endif
     
     /* print the entire directory tree */
     printNameAndContents(BK_BASE_PTR( &(volInfo.dirTree) ), 0);
