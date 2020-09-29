@@ -1174,9 +1174,8 @@ int writeElToritoBootCatalog(VolInfo* volInfo,
     /* load segment leave it at 0 */
     /* system type, leave it at 0 */
     /* 1 byte unused, leave it at 0 */
-    /* sector count. i have yet to see a boot record with a sector count 
-    * that's not 4 */
-    write721ToByteArray(&(buffer[38]), 4);
+    /* sector count */
+    write721ToByteArray(&(buffer[38]), volInfo->bootRecordSize / NBYTES_VIRTUAL_SECTOR);
     /* logical block number of boot record file. this is not known until 
     * after that file is written */
     *bootRecordSectorNumberOffset = wcSeekTell(volInfo) + 40;
