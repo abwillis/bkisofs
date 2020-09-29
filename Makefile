@@ -15,6 +15,8 @@ ifdef WINDOWS_BUILD
   CPPFLAGS += -DWINDOWS_BUILD
 endif
 
+all:  bk.dll example
+
 bk.a: $(OBJECTS)
 	@echo 'Creating bk.a'
 	@$(AR) -cr bk.a $(OBJECTS)
