@@ -19,6 +19,8 @@ int main( int argv, char** argc)
     /* bk functions return ints that need to be checked to see whether
     * the functions were successful or not */
     int rc;
+
+    /* Variables for paths */
     char* fullpath = (char *) malloc(1 + strlen(argc[2]) + strlen(argc[3]));
     char* partpath;
     char* partpathws = (char *) malloc(256);
@@ -53,7 +55,6 @@ int main( int argv, char** argc)
     if(rc <= 0)    
         fatalError(bk_get_error_string(rc));
     
-    printf("a2 %s, a3 %s\n",argc[2],argc[3]);
     /* File to add to volume */
     rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
     if(rc <= 0)   {
@@ -61,15 +62,12 @@ int main( int argv, char** argc)
             strcpy(fullpath, spath);
             strcat(fullpath, "/");
             strcat(fullpath, argc[2]);
-            printf("fullpath %s\n",fullpath);
             rc = bk_delete(&volInfo, fullpath);
             if(rc <=0) {
-                printf("test 4\n");
                 fatalError(bk_get_error_string(rc));
             }
             rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
             if(rc <=0) {
-                printf("test 2\n");
                 fatalError(bk_get_error_string(rc));
             }
         } else if (rc == BKERROR_DIR_NOT_FOUND_ON_IMAGE) {
