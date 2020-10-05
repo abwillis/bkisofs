@@ -28,7 +28,7 @@ int main( int argv, char** argc)
     strcpy(spath,argc[3]);
     
     if(argv <= 4)
-        fatalError("Usage: skeleton myfile.iso file location outfile.iso\nfull paths required");
+        fatalError("Usage: addfileiso myfile.iso file location outfile.iso\nfull paths required");
     
     /* initialise volInfo, set it up to scan for duplicate files */
     rc = bk_init_vol_info(&volInfo, true);
