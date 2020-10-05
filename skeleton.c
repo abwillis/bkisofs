@@ -14,6 +14,10 @@ void writeProgressUpdaterCbk(VolInfo* volInfo, double percentComplete);
 
 int main( int argv, char** argc)
 {
+    /* Check for proper number of arguments */
+    if(argv <= 4)
+        fatalError("Usage: skeleton myfile.iso file location outfile.iso\nfull paths required");
+
     /* A variable of type VolInfo stores information about an image */
     VolInfo volInfo;
     /* bk functions return ints that need to be checked to see whether
@@ -26,9 +30,6 @@ int main( int argv, char** argc)
     char* partpathws = (char *) malloc(256);
     char* spath = (char *) malloc(strlen(argc[3]));
     strcpy(spath,argc[3]);
-    
-    if(argv <= 4)
-        fatalError("Usage: skeleton myfile.iso file location outfile.iso\nfull paths required");
     
     /* initialise volInfo, set it up to scan for duplicate files */
     rc = bk_init_vol_info(&volInfo, true);
