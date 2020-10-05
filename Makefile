@@ -28,6 +28,9 @@ $(OBJECTS): %.o: %.c %.h Makefile bk.h bkInternal.h
 
 example: example.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) example.c bk.a -o example.exe
+        
+skeleton: skeleton.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) skeleton.c bk.a -o skeleton.exe
 
 bk.dll: bk.a
 	@$(CC) -Zdll bk.a
