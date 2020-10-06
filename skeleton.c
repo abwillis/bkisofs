@@ -11,12 +11,14 @@ void fatalError(const char* message);
 void printNameAndContents(BkFileBase* item, int numSpaces);
 void readProgressUpdaterCbk(VolInfo* volInfo);
 void writeProgressUpdaterCbk(VolInfo* volInfo, double percentComplete);
+char* forwardtoback(char* paths);
 
 int main( int argv, char** argc)
 {
     /* Check for proper number of arguments */
     if(argv <= 4)
-        fatalError("Usage: skeleton myfile.iso file location outfile.iso\nfull paths required");
+        fatalError("Usage: skeleton myfile.iso new-dir-name destination-path outfile.iso\nfull paths required");
+        /* fatalError("Usage: addfileiso myfile.iso file-to-add destination-path outfile.iso\nfull paths required"); */ /* For add file */
 
     /* A variable of type VolInfo stores information about an image */
     VolInfo volInfo;
@@ -25,12 +27,17 @@ int main( int argv, char** argc)
     int rc;
 
     /* Variables for paths */
-    char* fullpath = (char *) malloc(1 + strlen(argc[2]) + strlen(argc[3]));
+    /* char* fullpath = (char *) malloc(1 + strlen(argc[2]) + strlen(argc[3])); */ /* for add file */
     char* partpath;
     char* partpathws = (char *) malloc(256);
-    char* spath = (char *) malloc(strlen(argc[3]));
-    strcpy(spath,argc[3]);
-    
+    /* char* spath = (char *) malloc(strlen(argc[3])); */
+    /* strcpy(spath,argc[3]); */  /* This line and the previous is used for addfileiso */
+    char* opath = (char *) malloc(strlen(argc[2]));
+
+    printf("argc[2] %s\nargc[3] %s\n",argc[2], argc[3]);
+    opath = forwardtoback(argc[3]);
+    /* npath = forwardtoback(argc[2]); */
+
     /* initialise volInfo, set it up to scan for duplicate files */
     rc = bk_init_vol_info(&volInfo, true);
     if(rc <= 0)
@@ -55,7 +62,24 @@ int main( int argv, char** argc)
         rc = bk_read_dir_tree(&volInfo, FNTYPE_9660, false, readProgressUpdaterCbk);
     if(rc <= 0)    
         fatalError(bk_get_error_string(rc));
-    
+
+    /* Add Directories */
+;
+        partpath = strtok(argc[2],"\\/");
+        strcpy(partpathws, opath);
+        while (partpath != NULL) {
+            printf("partpathws %s\npartpath %s\n",partpathws, partpath);
+            rc = bk_create_dir(&volInfo, partpathws, partpath);
+            strcat(partpathws, partpath);
+            strcat(partpathws, "/");
+            partpath = strtok(NULL,"\\/");
+        }
+
+    if(rc <= 0) 
+        fatalError(bk_get_error_string(rc));
+
+
+#if 0  /* Below used for adding files */
     /* File to add to volume */
     rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
     if(rc <= 0)   {
@@ -88,6 +112,7 @@ int main( int argv, char** argc)
                 fatalError(bk_get_error_string(rc));
         }
     }
+#endif
     
     /* print the entire directory tree */
     printNameAndContents(BK_BASE_PTR( &(volInfo.dirTree) ), 0);
@@ -160,4 +185,22 @@ void readProgressUpdaterCbk(VolInfo* volInfo)
 void writeProgressUpdaterCbk(VolInfo* volInfo, double percentComplete)
 {
     printf("Write progress updater: ~%.2lf%% complete\n", percentComplete);
+}
+
+/* Need backward slashes but users used to forward slashes, change them */
+char* forwardtoback(char* paths)
+{
+    char* partpath = (char *) malloc(256);
+    char* partpathws = (char *) malloc(256);
+    printf("paths %s\n", paths);
+    partpath = strtok(paths,"\\/");
+    printf("partpath %s\n", partpath);
+    strcpy(partpathws, "/");
+    while (partpath != NULL) {
+        strcat(partpathws, partpath);
+        partpath = strtok(NULL,"\\/");
+        strcat(partpathws, "/");
+    }
+    printf("partpathws %s\n",partpathws);
+    return partpathws;
 }
