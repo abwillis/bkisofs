@@ -16,7 +16,7 @@ int main( int argv, char** argc)
 {
     /* Check for proper number of arguments */
     if(argv <= 4)
-        fatalError("Usage: addfileiso myfile.iso file location outfile.iso\nfull paths required");
+        fatalError("Usage: addfileiso myfile.iso file-to-add destination-path outfile.iso\nfull paths required");
 
     /* A variable of type VolInfo stores information about an image */
     VolInfo volInfo;
