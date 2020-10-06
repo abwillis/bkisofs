@@ -32,6 +32,12 @@ example: example.c
 skeleton: skeleton.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) skeleton.c bk.a -o skeleton.exe
 
+addfileiso: addfileiso.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) addfileiso.c bk.a -o addfileiso.exe
+
+adddiriso: adddiriso.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) adddiriso.c bk.a -o adddiriso.exe
+
 bk.dll: bk.a
 	@$(CC) -Zdll bk.a
 
