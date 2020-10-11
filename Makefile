@@ -42,5 +42,5 @@ bk.dll: bk.a
 	@$(CC) -Zdll bk.a
 
 clean: 
-	$(RM) *.o bk.a example.exe bk.dll
+	$(RM) *.o bk.a *.exe bk.dll
 
