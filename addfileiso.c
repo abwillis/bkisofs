@@ -86,7 +86,7 @@ int main( int argv, char** argc)
             rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
             if(rc <= 0) 
                 fatalError(bk_get_error_string(rc));
-        }
+        } else fatalError(bk_get_error_string(rc));
     }
     
     /* print the entire directory tree */
