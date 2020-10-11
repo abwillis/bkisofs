@@ -11,6 +11,11 @@ void fatalError(const char* message);
 void printNameAndContents(BkFileBase* item, int numSpaces);
 void readProgressUpdaterCbk(VolInfo* volInfo);
 void writeProgressUpdaterCbk(VolInfo* volInfo, double percentComplete);
+int addcall(VolInfo* volInfo2, const char* srcPathAndName, 
+           char* destPathStr, void(*progressFunction)(VolInfo*));
+int addcallas(VolInfo volInfo, const char* srcPathAndName, 
+              const char* destPathStr, const char* nameToUse, 
+              void(*progressFunction)(VolInfo*));
 
 int main( int argv, char** argc)
 {
@@ -23,13 +28,6 @@ int main( int argv, char** argc)
     /* bk functions return ints that need to be checked to see whether
     * the functions were successful or not */
     int rc;
-
-    /* Variables for paths */
-    char* fullpath = (char *) malloc(1 + strlen(argc[2]) + strlen(argc[3]));
-    char* partpath;
-    char* partpathws = (char *) malloc(256);
-    char* spath = (char *) malloc(strlen(argc[3]));
-    strcpy(spath,argc[3]);
 
     /* initialise volInfo, set it up to scan for duplicate files */
     rc = bk_init_vol_info(&volInfo, true);
@@ -56,39 +54,9 @@ int main( int argv, char** argc)
     if(rc <= 0)    
         fatalError(bk_get_error_string(rc));
     
-    /* File to add to volume */
-    rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
-    if(rc <= 0)   {
-        if(rc == BKERROR_DUPLICATE_ADD) {
-            strcpy(fullpath, spath);
-            strcat(fullpath, "/");
-            strcat(fullpath, argc[2]);
-            rc = bk_delete(&volInfo, fullpath);
-            if(rc <=0) {
-                fatalError(bk_get_error_string(rc));
-            }
-            rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
-            if(rc <=0) {
-                fatalError(bk_get_error_string(rc));
-            }
-        } else if (rc == BKERROR_DIR_NOT_FOUND_ON_IMAGE) {
-            partpath = strtok(argc[3],"\\/");
-            strcpy(partpathws, "");
-            while (partpath != NULL) {
-                strcat(partpathws, "/");
-                rc = bk_create_dir(&volInfo, partpathws, partpath);
-                strcat(partpathws, partpath);
-                partpath = strtok(NULL,"\\/");
-            }
-           
-            if(rc <= 0) 
-                fatalError(bk_get_error_string(rc));
-            rc = bk_add(&volInfo, argc[2], spath, addProgressUpdaterCbk);
-            if(rc <= 0) 
-                fatalError(bk_get_error_string(rc));
-        } else fatalError(bk_get_error_string(rc));
-    }
-    
+    /* Add file\dir to volume */
+    rc = addcall(&volInfo, argc[2], argc[3], addProgressUpdaterCbk);
+        
     /* print the entire directory tree */
     printNameAndContents(BK_BASE_PTR( &(volInfo.dirTree) ), 0);
     
@@ -160,4 +128,52 @@ void readProgressUpdaterCbk(VolInfo* volInfo)
 void writeProgressUpdaterCbk(VolInfo* volInfo, double percentComplete)
 {
     printf("Write progress updater: ~%.2lf%% complete\n", percentComplete);
+}
+
+/* add file/dir procedure call */
+int addcall(VolInfo* volInfo2, const char* srcPathAndName, 
+           char* destPathStr, void(*progressFunction)(VolInfo*))
+{
+    /* Variable for return codes */
+    int rc;
+
+    /* Variables for paths */
+    char* fullpath = (char *) malloc(1 + strlen(srcPathAndName) + strlen(destPathStr));
+    char* partpath;
+    char* partpathws = (char *) malloc(256);
+    char* spath = (char *) malloc(strlen(destPathStr));
+    strcpy(spath,destPathStr);
+
+    rc = bk_add(volInfo2, srcPathAndName, destPathStr, addProgressUpdaterCbk);
+    if(rc <= 0)   {
+        if(rc == BKERROR_DUPLICATE_ADD) {
+            strcpy(fullpath, spath);
+            strcat(fullpath, "/");
+            strcat(fullpath, srcPathAndName);
+            rc = bk_delete(volInfo2, fullpath);
+            if(rc <=0) {
+                fatalError(bk_get_error_string(rc));
+            }
+            rc = bk_add(volInfo2, srcPathAndName, spath, addProgressUpdaterCbk);
+            if(rc <=0) {
+                fatalError(bk_get_error_string(rc));
+            }
+        } else if (rc == BKERROR_DIR_NOT_FOUND_ON_IMAGE) {
+            partpath = strtok(destPathStr,"\\/");
+            strcpy(partpathws, "");
+            while (partpath != NULL) {
+                strcat(partpathws, "/");
+                rc = bk_create_dir(volInfo2, partpathws, partpath);
+                strcat(partpathws, partpath);
+                partpath = strtok(NULL,"\\/");
+            }
+           
+            if(rc <= 0) 
+                fatalError(bk_get_error_string(rc));
+            rc = bk_add(volInfo2, srcPathAndName, spath, addProgressUpdaterCbk);
+            if(rc <= 0) 
+                fatalError(bk_get_error_string(rc));
+        } else fatalError(bk_get_error_string(rc));
+    }
+    return rc;
 }
