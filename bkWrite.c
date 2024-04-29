@@ -1160,22 +1160,61 @@ int writeElToritoBootCatalog(VolInfo* volInfo,
     /* SETUP INITIAL entry (next 20 bytes of boot catalog) */
     /* boot indicator. 0x88 = bootable */
     buffer[32] = 0x88;
-    /* boot media type */
+    
+    /* BEGIN fix from Javier Navarro */
+    /* The "sector count" value to load the bootstrap into memory is 
+    * too large. Your code puts more than 2880 sectors, overflowing the
+    * initial memory. Actually the normal values are 1 or 4.
+    * Loading up to 60 works fine in real-hardware and emulated-hardware
+    * (bochs), but there is no sense in loading more than 4 sectors. */
+    
+    /* sector count default */
+	buffer[38] = 4; /* buffer[38][39] little endian word = 0x0004 default */
+	buffer[39] = 0;
+    /* boot media type & sector count */
     if(volInfo->bootMediaType == BOOT_MEDIA_NO_EMULATION)
-        buffer[33] = 0;
+    {   buffer[33] = 0; /* boot media type */
+	buffer[38] = 4; /* sector count */
+    }
     else if(volInfo->bootMediaType == BOOT_MEDIA_1_2_FLOPPY)
-        buffer[33] = 1;
+    {   buffer[33] = 1; /* boot media type */
+	buffer[38] = 1; /* sector count */
+    }
     else if(volInfo->bootMediaType == BOOT_MEDIA_1_44_FLOPPY)
-        buffer[33] = 2;
+    {   buffer[33] = 2; /* boot media type */
+	buffer[38] = 1; /* sector count */
+    }
     else if(volInfo->bootMediaType == BOOT_MEDIA_2_88_FLOPPY)
-        buffer[33] = 3;
+    {   buffer[33] = 3; /* boot media type */
+	buffer[38] = 1; /* sector count */
+    }
     else if(volInfo->bootMediaType == BOOT_MEDIA_HARD_DISK)
-        buffer[33] = 4;
+    {   buffer[33] = 4; /* boot media type */
+	buffer[38] = 1; /* sector count */
+    }
     /* load segment leave it at 0 */
     /* system type, leave it at 0 */
     /* 1 byte unused, leave it at 0 */
-    /* sector count */
-    write721ToByteArray(&(buffer[38]), volInfo->bootRecordSize / NBYTES_VIRTUAL_SECTOR);
+    
+    //~ /* boot media type */
+    //~ if(volInfo->bootMediaType == BOOT_MEDIA_NO_EMULATION)
+        //~ buffer[33] = 0;
+    //~ else if(volInfo->bootMediaType == BOOT_MEDIA_1_2_FLOPPY)
+        //~ buffer[33] = 1;
+    //~ else if(volInfo->bootMediaType == BOOT_MEDIA_1_44_FLOPPY)
+        //~ buffer[33] = 2;
+    //~ else if(volInfo->bootMediaType == BOOT_MEDIA_2_88_FLOPPY)
+        //~ buffer[33] = 3;
+    //~ else if(volInfo->bootMediaType == BOOT_MEDIA_HARD_DISK)
+        //~ buffer[33] = 4;
+    //~ /* load segment leave it at 0 */
+    //~ /* system type, leave it at 0 */
+    //~ /* 1 byte unused, leave it at 0 */
+    //~ /* sector count */
+    //~ write721ToByteArray(&(buffer[38]), volInfo->bootRecordSize / NBYTES_VIRTUAL_SECTOR);
+    
+    /* END fix from Javier Navarro */
+    
     /* logical block number of boot record file. this is not known until 
     * after that file is written */
     *bootRecordSectorNumberOffset = wcSeekTell(volInfo) + 40;
@@ -1209,12 +1248,12 @@ int writeElToritoVd(VolInfo* volInfo, bk_off_t* bootCatalogSectorNumberOffset)
     /* SETUP BOOT record volume descriptor sector */
     /* boot record indicator, must be 0 (bzero at start took care of this) */
     /* iso9660 identifier, must be "CD001" */
-    strncpy((char*)buffer + 1, "CD001", 5);
+    memcpy(buffer + 1, "CD001", 5);
     /* version, must be 1 */
     buffer[6] = 1;
     /* boot system identifier, must be 32 bytes "EL TORITO SPECIFICATION" 
     * padded with 0x00 (bzero at start took care of this) */
-    strncpy(&(buffer[7]), "EL TORITO SPECIFICATION", 23);
+    memcpy(&(buffer[7]), "EL TORITO SPECIFICATION", 23);
     /* unused 32 bytes, must be 0 (bzero at start took care of this) */
     /* boot catalog location, 4 byte intel format. written later. */
     *bootCatalogSectorNumberOffset = wcSeekTell(volInfo) + 71;
@@ -1838,13 +1877,13 @@ int writeRockER(VolInfo* volInfo)
     record[7] = 1;
     
     /* extension identifier */
-    strncpy(&(record[8]), "IEEE_P1282", 10);
+    memcpy(&(record[8]), "IEEE_P1282", 10);
     
     /* extension descriptor */
-    strncpy(&(record[18]), "DRAFT_1_12", 10);
+    memcpy(&(record[18]), "DRAFT_1_12", 10);
     
     /* extension source */
-    strncpy(&(record[28]), "ADOPTED_1994_07_08", 18);
+    memcpy(&(record[28]), "ADOPTED_1994_07_08", 18);
     
     rc = wcWrite(volInfo, record, 46);
     if(rc <= 0)
@@ -2074,8 +2113,10 @@ int writeRockSL(VolInfo* volInfo, SymLinkToWrite* symlink, bool doWrite)
     }
     
     free(record);
+
     return (int)(5 + numBytesNeeded);
 }
+
 /* This doesn't need support for CE because it's only written in one place,
 * the root 'self' directory record. */
 int writeRockSP(VolInfo* volInfo)
@@ -2106,6 +2147,7 @@ int writeRockSP(VolInfo* volInfo)
     
     return 1;
 }
+
 int writeVdsetTerminator(VolInfo* volInfo)
 {
     int rc;
@@ -2136,6 +2178,7 @@ int writeVdsetTerminator(VolInfo* volInfo)
     
     return 1;
 }
+
 /*
 * -has to be called after the files were written so that the 
 *  volume size is recorded properly
@@ -2162,6 +2205,7 @@ int writeVolDescriptor(VolInfo* volInfo, bk_off_t rootDrLocation,
     else
         byte = 2;
     /* END VOLUME descriptor type */
+
     rc = write711(volInfo, byte);
     if(rc <= 0)
         return rc;
@@ -2501,6 +2545,7 @@ int writeVolDescriptor(VolInfo* volInfo, bk_off_t rootDrLocation,
     
     return 1;
 }
+
 /******************************************************************************
 * wroteIsolinuxBootRecord()
 * Check whether the file already written to the new iso was a boot record.
