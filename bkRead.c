@@ -17,6 +17,9 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 #include <limits.h>
 
 #include "bk.h"

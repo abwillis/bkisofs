@@ -14,6 +14,9 @@
 
 #include <stdlib.h>
 #include <fcntl.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 #include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
