@@ -23,7 +23,7 @@ else
   PICFLAGS = -fPIC
 endif
 
-PROGRAMS = example$(EXEEXT) skeleton$(EXEEXT) addfileiso$(EXEEXT) adddiriso$(EXEEXT)
+PROGRAMS = isoedit$(EXEEXT) example$(EXEEXT) skeleton$(EXEEXT) addfileiso$(EXEEXT) adddiriso$(EXEEXT)
 
 .PHONY: all clean
 
@@ -37,6 +37,9 @@ bk.a: $(OBJECTS)
 $(OBJECTS): %.o: %.c %.h Makefile bk.h bkInternal.h
 	@echo 'Compiling' $<
 	@$(CC) $(CPPFLAGS) $(CFLAGS) $(PICFLAGS) -c $< -o $@
+
+isoedit$(EXEEXT): isoedit.c bk.a
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) isoedit.c bk.a $(LDLIBS) -o $@
 
 example$(EXEEXT): example.c bk.a
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) example.c bk.a $(LDLIBS) -o $@
@@ -59,4 +62,5 @@ libbk.so: $(OBJECTS)
 endif
 
 clean:
-	$(RM) $(OBJECTS) bk.a bk.dll libbk.so example example.exe skeleton skeleton.exe addfileiso addfileiso.exe adddiriso adddiriso.exe
+	$(RM) $(OBJECTS) bk.a bk.dll libbk.so example example.exe skeleton skeleton.exe addfileiso addfileiso.exe adddiriso adddiriso.exe isoedit isoedit.exe
+

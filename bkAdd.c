@@ -436,6 +436,7 @@ int bk_create_dir(VolInfo* volInfo, const char* destPathStr,
     newDir = malloc(sizeof(BkDir));
     if(newDir == NULL)
         return BKERROR_OUT_OF_MEMORY;
+    memset(newDir, 0, sizeof(BkDir));
     
     strcpy(BK_BASE_PTR(newDir)->name, newDirName);
     
